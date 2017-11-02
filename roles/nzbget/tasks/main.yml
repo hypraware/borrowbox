@@ -1,0 +1,39 @@
+- name: Create NZBGet Config Directory
+  file:
+    path: "{{ app_base }}/nzbget"
+    owner: "{{ run_user }}"
+    group: "{{ run_user }}"
+    mode: 0775
+    state: directory
+    recurse: yes
+
+- name: Get UID of {{ run_user }}
+  shell: id -u "{{ run_user }}"
+  register: run_user_id 
+
+- name: Download and Run NZBGet container
+  docker_container:
+    name: nzbget
+    image: linuxserver/nzbget
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ app_base }}/nzbget:/config"
+      - "{{ dl_base }}:/downloads"
+    ports:
+      - "{{ nzbget_port }}:6789"
+    log_driver: syslog
+    log_opt:
+      tag: nzbget
+    env:
+      VERSION: latest
+      PUID: "{{ run_user_id.stdout }}"
+      GUID: "{{ run_user_id.stdout }}"
+      TZ: "{{ timezone }}"
+
+- name: Open Firewall port for NZBGet
+  ufw:
+    rule: allow
+    port: "{{ nzbget_port }}"
+    proto: tcp
+    state: enabled

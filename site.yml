@@ -1,0 +1,58 @@
+---
+### This playbook will install some usenet tools automatically for you.
+### Please run this on a fresh install of Ubuntu 16.04 ###
+### v1.0 - 10/26/2017
+
+- hosts: blah
+  remote_user: root
+  become: no
+  gather_facts: False
+
+### This takes care of making sure python2 is installed and if we want to run any plays locally in the future. Needed for Ubuntu 16.04 ###
+  pre_tasks:
+  - name: Check for ansible and install if missing, then gather facts
+    raw: test -e /usr/bin/ansible || (apt install -y ansible)
+
+  - setup: # gather_facts
+
+  roles:
+###  Main roles (Do not comment them out) ###
+    - { role: common, tags: [ "common" ] } # install pre-requisites / upgrade apt / folder structure
+    - { role: docker, tags: [ "docker" ] } # docker install / docker user setup
+    - { role: ufw, tags: [ "ufw" ] } # firewall install
+
+### Media Organizer / Streamer ###
+    - { role: plex, tags: [ "plex" ] } # Install plex via Docker
+
+### Usenet Downloader ###
+    - { role: nzbget, tags: [ "nzbget" ] } # Install NZBGet via Docker
+
+### Media Searching ###
+    - { role: sonarr, tags: [ "sonarr" ] } # Install Sonarr via Docker
+    - { role: radarr, tags: [ "radarr" ] } # Install Radarr via Docker
+
+### Docker Container Auto-Updater ###
+    - { role: watchtower, tags: [ "watchtower" ] } # Install Watchtower via Docker
+
+### Docker Web UI Manager ###
+    - { role: portainer, tags: [ "portainer" ] } # Install Portainer via Docker
+
+### Docker Console UI Manager ###
+    - { role: dry, tags: [ "dry" ] } # Install dry to system
+
+### Web Frontend with SSL support ###
+#    - { role: caddy, tags: [ "caddy" ] } # Proxy with SSL
+
+
+
+
+
+### TODO ###
+### FUTURE ROLES ###
+# ombi
+# organizr
+# rutorrent/rtorrent
+# mylar
+# lazylibrarian
+# ubooquity
+# letsencrypt / traefik

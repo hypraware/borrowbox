@@ -1,0 +1,44 @@
+###############################################################################
+### Edit this file, please? :) ###
+
+### Set your timezone ### 
+timezone: America/New_York
+
+### User to run Docker Applications as. ###
+run_user: abc
+
+### Docker Applications base path: I suggest /opt/docker or /app/docker ###
+app_base: /opt/docker
+
+### Media storage base path: Where you wanted your completed media to be. I suggest /storage (/media is used on debian based systems for other things) ###
+media_base: /storage
+
+### Where all the downloads will go ###
+dl_base: /downloads/nzb
+
+### Ports for each app. Feel free to modify, but each app is currently set to it's default. I suggest to leave as is. ###
+plex_port: 32400
+nzbget_port: 6789
+sonarr_port: 8989
+radarr_port: 7878
+portainer_port: 9000
+caddy_port: 80
+caddy_port_ssl: 443
+
+
+###############################################################################
+### ADVANCED - DO NOT TOUCH BELOW UNLESS YOU KNOW WHAT YOU'RE DOING, K? :) ###
+
+dl_incomplete: "{{ dl_base }}/incomplete"
+dl_tvcomplete: "{{ dl_base }}/tv"
+dl_mvcomplete: "{{ dl_base }}/movies"
+
+media_tv : "{{ media_base }}/tv"
+media_movies: "{{ media_base }}/movies"
+
+
+
+### Future ###
+torrentdl_base: /downloads/torrents
+
+

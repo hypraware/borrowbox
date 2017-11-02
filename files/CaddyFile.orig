@@ -1,0 +1,279 @@
+############################ Can't test all of the code for every app below so use as a reference only! ###########################
+
+# Notes: (Last edit: 10/24/17) - Deprecated!
+
+# Make sure all your apps are setup/compatible with Base URL's and have all their settings configured to work with reverse proxies
+# Make sure to change the port #'s to match your apps especially if the're not the default ones
+# Included FastCGI code.... revised and should make things easier for Windows users
+# Also this config includes a lot of extra code that isn't necessarily required so omit the things you don't want or care about
+
+# Edit 1:  Fixed some things and added more comments, whether they help....?
+
+# Edit 2:  Looks like Caddy is deprecating "proxy_header" directives and moving to "header_upstream" & "header_downstream" instead
+#		   New code should work with Caddy v0.9+
+#		   Replaced old "proxy_header" code with new "transparent" preset which inherently includes the following directives:
+#				header_upstream Host {host}
+#				header_upstream X-Real-IP {remote}
+#				header_upstream X-Forwarded-For {remote}
+#				header_upstream X-Forwarded-Proto {scheme}
+			
+# Edit 3:  Added code to get Glances monitoring tool working with Caddy and also a way to secure it with the "basicauth" directive
+
+# Edit 4:  Added code at bottom to serve the apps over localhost on port 80
+
+# Edit 5:  Getting PHP up and running on Windows is super simple now that Caddy can start the php-cgi server itself
+
+# 		   You basically just need to download PHP and put the folder in Caddy's root directory and use the new code
+#		   http://windows.php.net/download/
+
+#		   Newer builds of PHP require Visual C++ Redistributable for Visual Studio installed.
+#		   Choose which PHP version you want and install the corresponding VC++ package if not already installed on your system
+
+#		   PHP 7.x built with (VC14) 
+#          https://www.microsoft.com/en-us/download/details.aspx?id=48145
+
+#		   PHP 5.6 built with (VC11) 
+#          http://www.microsoft.com/en-us/download/details.aspx?id=30679
+
+# Edit 6:  Added Emby location and web addresses to each app
+
+# Edit 7:  Added Deluge location (Optimized the rewrite statement + fixed code so it would work over domain and localhost)
+
+# Edit 8:  Cleaned up Deluge code to make it less ubiquitous and less reliant on domain/localhost
+
+# Edit 9:  Added rewrite code to deal with 404 error when trying to load glances.png
+
+# Edit 10: Someone found a simpler way to get Deluge working on the Caddy Forums
+
+# Edit 11: Removed the extra "header_upstream X-Forwarded-Host {host}" code from every location except PlexPy!
+
+# Edit 12: Added location & GitHub address to new movie downloader app called Watcher
+
+# Edit 13: Added location & GitHub address to new movie downloader app called Radarr (fork of Sonarr for movies)
+
+# Edit 14: Removed the rewrite to add trailing "/" for NZBHydra & Ombi since it's not needed it seems
+
+# Edit 15: Updated PlexRequests.Net to it's new name (Ombi) and GitHub address
+
+# Edit 16: Updated and streamlined code for fastcgi, gzip and a few other sections, removed "http://" from all addresses
+
+# Edit 17: Adding URL's for Caddy Server, Forum & User Guide:
+#          https://caddyserver.com/
+#          https://caddyserver.com/docs
+#          https://forum.caddyserver.com/
+
+# Edit 18: Added example for Plex subdomain! You can use subdomains instead of subfolders for all your apps if you prefer
+
+# Edit 19: Updated PlexPy's GitHub address. The "header_upstream X-Forwarded-Host {host}" is only needed in SSL/HTTPS domain block
+#		   The dev is going to rename PlexPy eventually so will update name when official
+
+# Edit 20: Added link to Visual C++ download since newer PHP versions require it!  Look at the "Edit 5" section above!
+
+# Edit 21: Watcher is now deprecated and dev is rewriting it to work with Python 3.x (Watcher3), updated GitHub address
+
+# Edit 22: Organizr is a nice php Dashboard to help organize your apps! https://github.com/causefx/Organizr
+#		   Alternative Dashboard is Muximux! https://github.com/mescon/Muximux
+
+# Edit 23: Was getting some 502 Bad Gateway errors with php seeming to crash after a while using Organizr...?
+		  
+#		   Added some PHP arguments to Windows - "Environment Variables" to see if it would help?
+#		   Only works with PHP v7.1+ on "Windows" - (PHP 5.x/7.0 doesn't support these arguments on "Windows" it seems)
+#		   This would allow for 2 extra fastcgi spawns and would recycle fastcgi after 100 requests
+
+#		   PHP_FCGI_CHILDREN
+#		   2
+		   
+#		   PHP_FCGI_MAX_REQUESTS
+#		   100
+
+# Edit 24: The 2 arguments above seems to have solved the random PHP crashes with Organizr's Homepage so far
+
+# Edit 25: Don't update to Caddy v0.10.x until the proxy directive using "without" get's fixed or Glances will not work
+#	       https://github.com/mholt/caddy/issues/1604
+
+#		   You could always just use a subdomain for Glances as an alternative!
+
+# Edit 26: Proxying should be fixed in v0.10.1 and safe to upgrade.......?
+
+#		   Some of the syntax has/will change in v0.10.x and I'll create a new pastebin going forward
+#		   New Caddyfile code is short and will import most of the directives from a separate file called "common.conf"
+
+#				Caddyfile:		https://pastebin.com/bLVJ4vsN
+#				Common.conf:	https://pastebin.com/hdDKbcSV
+
+# Edit 27: Having some issues with caddy lately so falling back to Nginx until i can work things out.
+
+####################################################### Code starts below ########################################################
+
+yourdomain.com {						
+
+	ext .html .htm .php
+	root /caddy/www 					# Windows location, change it to where the html root is on your system/OS
+	
+	# Gzip will compress files to speedup/minimize the size of data transferred but not 100% necessary 
+	
+	gzip
+	
+	tls myname@emailprovider.com		# Email for Let's Encrypt Verification
+	
+	# Having logs enabled can provide useful information about your setup but not 100% necessary
+
+	log /caddy/access.log {
+	rotate {
+		size 5 		    # Rotate after 5 MB
+		age  7  		# Keep log files for 7 days
+		keep 2 			# Keep at most 2 log files
+		}
+	}
+	
+	# This errors block is great when first testing out your setup but not needed and can be omitted entirely
+
+	errors {
+	log /caddy/error.log {
+		size 5 		    # Set max size 5 MB
+		age  7 			# Keep log files for 7 days
+		keep 2  		# Keep at most 2 log files
+		}
+	}
+
+	# This header block below will provide you with some extra security, not 100% necessary but better safe then sorry
+
+	header / {	
+		X-Content-Type-Options nosniff
+		X-XSS-Protection "1; mode=block"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	}
+	
+	# You can normally use "127.0.0.1", use "Host IP" address if your running the web server or the apps on different machines
+
+	proxy /sabnzb 127.0.0.1:8080 {			# https://sabnzbd.org/
+		transparent
+	}
+
+	proxy /htpc 127.0.0.1:8085 {			# http://htpc.io/
+		transparent
+	}
+
+	proxy /headphones 127.0.0.1:8181 {		# https://github.com/rembo10/headphones
+		transparent
+	}
+
+	proxy /mylar 127.0.0.1:8090 {			# https://github.com/evilhero/mylar
+		transparent
+	}
+
+	proxy /lazy 127.0.0.1:5299 {			# https://github.com/DobyTang/LazyLibrarian 
+		transparent
+	}
+
+	proxy /emby 127.0.0.1:8096 {			# https://emby.media/
+       	transparent
+    }
+	
+	proxy /sonarr 127.0.0.1:8989 {			# https://sonarr.tv/
+		transparent
+	}
+
+	# Headphones uses port 8181 so make sure there's no conflict!
+
+	proxy /plexpy 127.0.0.1:8181 {			# https://github.com/JonnyWong16/plexpy
+		header_upstream X-Forwarded-Host {host}
+		transparent
+	}
+
+	proxy /nzbget 127.0.0.1:6789 {			# http://nzbget.net/
+		transparent
+	}
+
+	proxy /couch 127.0.0.1:5050 {			# https://couchpota.to/
+		transparent
+	}
+
+	proxy /nzbhydra 127.0.0.1:5075 {	    # https://github.com/theotherp/nzbhydra
+		transparent
+	}
+
+	proxy /ombi 127.0.0.1:3579 {            # https://github.com/tidusjar/Ombi
+		transparent
+	}
+
+	# The rewrite makes sure all of glances sub directory calls are proxied from domain to host
+
+	rewrite {
+        if {>Referer} has /glances
+        to /glances/{path}
+    }
+
+	# The code below gives you a tiny level of security requiring a username/password before Caddy will let you connect to it
+
+	basicauth /glances Username Password
+	
+	proxy /glances 127.0.0.1:61208 {		# https://github.com/nicolargo/glances
+        without /glances
+		transparent
+	}
+
+	proxy /deluge 127.0.0.1:8112 {			# http://deluge-torrent.org/
+    	without /deluge
+    	transparent
+    	header_upstream X-Deluge-Base "/deluge"
+  	}
+
+	proxy /watcher 127.0.0.1:9090 {			# https://github.com/nosmokingbandit/Watcher3
+    	transparent
+  	}
+	
+	proxy /radarr 127.0.0.1:7878 {			# https://github.com/Radarr/Radarr
+    	transparent
+  	}
+
+	# The new code below will startup the server & proxy PHP requests
+	
+	startup /caddy/php/php-cgi -b 127.0.0.1:9000 &
+	fastcgi / 127.0.0.1:9000 php
+
+}
+
+
+# Adding the following code will allow you to serve the above over locahost
+
+####################################################################################
+# Localhost code block
+####################################################################################
+
+http://localhost {
+
+	ext .html .htm .php
+    root /caddy/www					        # Windows location, change it to where the html root is on your system/OS
+   
+    gzip
+	
+	# Add all the apps you use below!! Only going to add one below as an example, just copy/paste code from above!
+	# The section below should be exactly like your what you have for your domain site!! 
+	
+	proxy /sonarr 127.0.0.1:8989 {				
+    	transparent
+    }
+
+	# App 2 code etc.........
+
+	# For localhost you just need to tell Caddy to pass PHP requests to the php-cgi server that you started above 
+
+    fastcgi / 127.0.0.1:9000 php
+
+}
+
+
+####################################################################################
+# Plex subdomain code block
+####################################################################################
+
+plex.yourdomain.com {
+
+gzip
+
+	proxy / 127.0.0.1:32400 {
+    	transparent
+	}
+
+}

@@ -1,0 +1,29 @@
+  - name: Install UFW Firewall
+    apt: 
+      name: ufw
+      state: present
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: Configure UFW defaults (Allow all outgoing, Deny all incoming)
+    ufw:
+      direction: "{{ item.direction }}"
+      policy: "{{ item.policy }}"
+    with_items:
+      - { direction: 'incoming', policy: 'deny' }  
+      - { direction: 'outgoing', policy: 'allow' }
+  
+  - name: Allow incoming ports
+    ufw:
+      rule: limit
+      port: 22
+      proto: tcp
+
+  - name: Enable UFW logging
+    ufw:
+      logging: on
+
+  - name: Enable UFW & Restart UFW
+    ufw:
+      state: enabled
+    notify: Restart UFW
