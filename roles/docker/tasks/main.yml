@@ -15,7 +15,7 @@
       name: "{{ run_user }}"
       groups: docker, {{ run_user }}
       append: yes
-  
-  - name: Install Docker-Py
+
+  - name: Install Docker Python Module
     pip:
-      name: docker-py
+      name: docker
