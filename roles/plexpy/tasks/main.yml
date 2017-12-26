@@ -1,4 +1,4 @@
-- name: Create Plex Config Directory
+- name: Create Plexpy Config Directory
   file:
     path: "{{ app_base }}/plexpy"
     owner: "{{ run_user }}"
@@ -23,7 +23,7 @@
     network_mode: host
     log_driver: syslog
     ports:
-    - "{{ plexpy_port }}:8181"
+      - "{{ plexpy_port }}:8181"
     log_opt:
       tag: plexpy
     env:
