@@ -1,0 +1,38 @@
+- name: Create Plex Config Directory
+  file:
+    path: "{{ app_base }}/plexpy"
+    owner: "{{ run_user }}"
+    group: "{{ run_user }}"
+    mode: 0775
+    state: directory
+    recurse: yes
+
+- name: Get UID of {{ run_user }}
+  shell: id -u "{{ run_user }}"
+  register: run_user_id
+
+- name: Download and Run Plex container
+  docker_container:
+    name: plexpy
+    image: linuxserver/plexpy
+    state: started
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ app_base }}/plexpy:/config"
+      - "{{ app_base }}/plex/hm?:/logs:ro
+    network_mode: host
+    log_driver: syslog
+    log_opt:
+      tag: plexpy
+    env:
+      VERSION: latest
+      PUID: "{{ run_user_id.stdout }}"
+      GUID: "{{ run_user_id.stdout }}"
+      TZ: "{{ timezone }}"
+
+- name: Open Firewall port for plex
+  ufw:
+    rule: allow
+    port: "{{ plexpy_port }}"
+    proto: tcp
+    state: enabled
