@@ -11,7 +11,7 @@
   shell: id -u "{{ run_user }}"
   register: run_user_id
 
-- name: Download and Run Plex container
+- name: Download and Run Plexpy container
   docker_container:
     name: plexpy
     image: linuxserver/plexpy
@@ -22,6 +22,8 @@
       - "{{ app_base }}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
     network_mode: host
     log_driver: syslog
+    ports:
+    - "{{ plexpy_port }}:8181"
     log_opt:
       tag: plexpy
     env:
