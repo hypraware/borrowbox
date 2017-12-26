@@ -33,7 +33,7 @@
     env:
       VERSION: latest
       PUID: "{{ run_user_id.stdout }}"
-      GUID: "{{ run_user_id.stdout }}"
+      PGID: "{{ run_user_id.stdout }}"
       TZ: "{{ timezone }}"
 
 - name: Open Firewall port for plex

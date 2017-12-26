@@ -9,7 +9,7 @@
 
 - name: Get UID of {{ run_user }}
   shell: id -u "{{ run_user }}"
-  register: run_user_id 
+  register: run_user_id
 
 - name: Download and Run Radarr container
   docker_container:
@@ -29,7 +29,7 @@
       tag: radarr
     env:
       PUID: "{{ run_user_id.stdout }}"
-      GUID: "{{ run_user_id.stdout }}"
+      PGID: "{{ run_user_id.stdout }}"
       TZ: "{{ timezone }}"
 
 - name: Open Firewall port for Radarr
