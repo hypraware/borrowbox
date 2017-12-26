@@ -4,10 +4,14 @@
       state: present
 
   - name: Ensure docker registry is available
-    apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable' state=present
+    apt_repository:
+      repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+      state: present
 
   - name: Ensure docker and dependencies are installed
-    apt: name=docker-ce update_cache=yes
+    apt:
+      name: docker-ce
+      update_cache: yes
     notify: Restart Docker
 
   - name: Add "{{ run_user }}" to Docker group

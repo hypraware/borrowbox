@@ -23,6 +23,7 @@
 
 ### Media Organizer / Streamer ###
     - { role: plex, tags: [ "plex" ] } # Install plex via Docker
+    - { role: plexpy, tags: [ "plexpy" ] } # Install plexpy via Docker (requires plex, obviously)
 
 ### Usenet Downloader ###
     - { role: nzbget, tags: [ "nzbget" ] } # Install NZBGet via Docker

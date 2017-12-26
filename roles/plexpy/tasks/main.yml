@@ -19,7 +19,7 @@
     restart_policy: unless-stopped
     volumes:
       - "{{ app_base }}/plexpy:/config"
-      - "{{ app_base }}/plex/hm?:/logs:ro
+      - "{{ app_base }}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
     network_mode: host
     log_driver: syslog
     log_opt:
