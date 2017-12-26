@@ -16,6 +16,9 @@
       groups: docker, {{ run_user }}
       append: yes
 
-  - name: Install Docker Python Module
+  - name: Install PIP Modules
     pip:
-      name: docker
+      name: "{{ item }}"
+    with_items:
+    - docker
+    - docker-compose

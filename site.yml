@@ -3,7 +3,7 @@
 ### Please run this on a fresh install of Ubuntu 16.04 ###
 ### v1.0 - 10/26/2017
 
-- hosts: blah
+- hosts: borrowbox
   remote_user: root
   become: no
   gather_facts: False
