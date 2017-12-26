@@ -9,9 +9,14 @@
 
 - name: Get UID of {{ run_user }}
   shell: id -u "{{ run_user }}"
-  register: run_user_id 
+  register: run_user_id
 
-- name: Download and Run Plex container
+- name: Pull Plex Container
+  docker_image:
+    name: linuxserver/plex
+    state: present
+
+- name: Run Plex container
   docker_container:
     name: plex
     image: linuxserver/plex
