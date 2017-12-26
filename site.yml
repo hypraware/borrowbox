@@ -41,8 +41,11 @@
 ### Docker Console UI Manager ###
     - { role: dry, tags: [ "dry" ] } # Install dry to system
 
+### Ombi Requests manager
+    - { role: ombi, tags: [ "ombi" ] } # Ombi is a requests manager and can send to sonarr/radarr amongst other things
+
 ### Web Frontend with SSL support ###
-#    - { role: caddy, tags: [ "caddy" ] } # Proxy with SSL
+#    - { role: caddy, tags: [ "caddy" ] } # Proxy with SSL (not working yet)
 
 
 
@@ -57,4 +60,3 @@
 # lazylibrarian
 # ubooquity
 # sabnzbd option
-# plexpy

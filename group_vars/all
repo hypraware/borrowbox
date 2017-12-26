@@ -23,6 +23,7 @@ nzbget_port: 6789
 sonarr_port: 8989
 radarr_port: 7878
 portainer_port: 9000
+ombi_port: 3579
 caddy_port: 80
 caddy_port_ssl: 443
 
